@@ -1,0 +1,335 @@
+{
+  "info": {
+    "_postman_id": "406b5654-e072-49f9-9305-044bcc816507",
+    "name": "Character API – Backend Testing",
+    "description": "Postman collection for testing Character API registration, login, post CRUD, logout, and route protection.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 - User Registration",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/auth/register"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{testUsername}}\",\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Register a test user. Set testUsername, testEmail, and testPassword in collection variables. Expected status: 201 Created."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - User Login",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/auth/login"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Log in using the test account. Postman should retain the localhost authentication cookie automatically. Expected status: 200 OK."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Create Post",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/posts"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Naruto Uzumaki\",\n  \"description\": \"Ninja of the Hidden Leaf\",\n  \"series\": \"Naruto\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Create a post. The test script automatically saves the returned MongoDB ID as postId for subsequent requests. Expected status: 201 Created."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "const data = pm.response.json();",
+              "const createdPostId = data._id || (data.post && data.post._id) || (data.data && data.data._id);",
+              "if (createdPostId) {",
+              "    pm.collectionVariables.set(\"postId\", createdPostId);",
+              "    console.log(\"Saved postId:\", createdPostId);",
+              "} else {",
+              "    console.warn(\"Post ID was not found in the response. Set postId manually before running requests 05-07.\");",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Get All Posts",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/posts"
+        },
+        "description": "Retrieve all posts. Expected status: 200 OK."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Get Single Post",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/posts/{{postId}}"
+        },
+        "description": "Retrieve the post created by request 03 using the postId collection variable. Expected status: 200 OK."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Update Post",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/posts/{{postId}}"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Naruto Uzumaki\",\n  \"description\": \"Seventh Hokage of the Hidden Leaf Village\",\n  \"series\": \"Naruto Shippuden\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Update the post created by request 03. Uses the postId collection variable. Expected status: 200 OK."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Delete Post",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/posts/{{postId}}"
+        },
+        "description": "Delete the post created by request 03. Uses the postId collection variable. Expected status: 200 OK."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 - User Logout",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/auth/logout"
+        },
+        "description": "Log out and clear or invalidate the authentication cookie. Expected status: 200 OK."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 - Get Posts After Logout",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/posts"
+        },
+        "description": "Verify that the public GET posts endpoint remains accessible after logout. Expected status: 200 OK."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 - Create Post After Logout (401)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/posts"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Sasuke Uchiha\",\n  \"description\": \"Last surviving member of the Uchiha clan\",\n  \"series\": \"Naruto\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Attempt to create a post after logout. This protected endpoint should reject the request. Expected status: 401 Unauthorized."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 401\", function () {",
+              "    pm.response.to.have.status(401);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "testUsername",
+      "value": "YOUR_TEST_USERNAME",
+      "type": "string"
+    },
+    {
+      "key": "testEmail",
+      "value": "YOUR_TEST_EMAIL",
+      "type": "string"
+    },
+    {
+      "key": "testPassword",
+      "value": "YOUR_TEST_PASSWORD",
+      "type": "string"
+    },
+    {
+      "key": "postId",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
